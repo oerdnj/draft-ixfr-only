@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!-- This template is for creating an Internet Draft using xml2rfc,
+     which is available here: http://xml.resource.org. -->
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!-- One method to get references from the online citation libraries.
+     There has to be one entity for each item to be referenced. 
+     An alternate method (rfc include) is described in the references. -->
+
+<!ENTITY RFC1995 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.1995.xml">
+<!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
+<!ENTITY RFC2845 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2845.xml">
+]>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<!-- used by XSLT processors -->
+<!-- For a complete list and description of processing instructions (PIs), 
+     please see http://xml.resource.org/authoring/README.html. -->
+<!-- Below are generally applicable Processing Instructions (PIs) that most I-Ds might want to use.
+     (Here they are set differently than their defaults in xml2rfc v1.32) -->
+<?rfc strict="yes" ?>
+<!-- give errors regarding ID-nits and DTD validation -->
+<!-- control the table of contents (ToC) -->
+<?rfc toc="yes"?>
+<!-- generate a ToC -->
+<?rfc tocdepth="4"?>
+<!-- the number of levels of subsections in ToC. default: 3 -->
+<!-- control references -->
+<?rfc symrefs="yes"?>
+<!-- use symbolic references tags, i.e, [RFC2119] instead of [1] -->
+<?rfc sortrefs="yes" ?>
+<!-- sort the reference entries alphabetically -->
+<!-- control vertical white space 
+     (using these PIs as follows is recommended by the RFC Editor) -->
+<?rfc compact="yes" ?>
+<!-- do not start each main section on a new page -->
+<?rfc subcompact="no" ?>
+<!-- keep one blank line between list items -->
+<!-- end of list of popular I-D processing instructions -->
+<rfc category="std" docName="draft-kerr-ixfr-only-00" ipr="trust200811" updates="1995">
+  <!-- category values: std, bcp, info, exp, and historic
+     ipr values: full3667, noModification3667, noDerivatives3667
+     you can add the attributes updates="NNNN" and obsoletes="NNNN" 
+     they will automatically be output with "(if approved)" -->
+
+  <!-- ***** FRONT MATTER ***** -->
+
+  <front>
+    <!-- The abbreviated title is used in the page header - it is only necessary if the 
+         full title is longer than 39 characters -->
+
+    <title abbrev="IXFR-ONLY">IXFR-ONLY to Prevent IXFR Fallback to AXFR
+    </title>
+
+    <!-- add 'role="editor"' below for the editors if appropriate -->
+
+    <!-- Another author who claims to be an editor -->
+
+    <!-- XXX: this should be Ond&#345;ej, but xml2rpc doesn't like it -->
+    <author fullname="Ondrej Sur&yacute;" initials="O.S."
+            surname="Sur&yacute;">
+      <organization>CZ.NIC</organization>
+
+      <address>
+        <postal>
+          <street>CZ.NIC, z. s. p. o.
+Americka 23</street>
+
+          <!-- Reorder these if your country does things differently -->
+
+          <city>120 00 Praha 2</city>
+
+          <country>CZ</country>
+        </postal>
+
+<!--        <phone></phone> -->
+
+        <email>ondrej.sury@nic.cz</email>
+
+        <!-- uri and facsimile elements may also be added -->
+      </address>
+    </author>
+
+    <author fullname="Shane Kerr" initials="S.K." role="editor"
+            surname="Kerr">
+      <organization>ISC</organization>
+
+      <address>
+        <postal>
+          <street>Bennebrokestraat 17-I</street>
+
+          <!-- Reorder these if your country does things differently -->
+
+          <city>1015 PE Amsterdam</city>
+
+          <country>NL</country>
+        </postal>
+
+        <phone>+31 64 6336297</phone>
+
+        <email>shane@isc.org</email>
+
+      </address>
+    </author>
+
+    <date month="July" year="2009" />
+
+    <!-- If the month and year are both specified and are the current ones, xml2rfc will fill 
+         in the current day for you. If only the current year is specified, xml2rfc will fill 
+	 in the current day and month for you. If the year is not the current one, it is 
+	 necessary to specify at least a month (xml2rfc assumes day="1" if not specified for the 
+	 purpose of calculating the expiry date).  With drafts it is normally sufficient to 
+	 specify just the year. -->
+
+    <!-- Meta-data Declarations -->
+
+    <area>Internet</area>
+
+    <workgroup>DNSext Working Group</workgroup>
+
+    <!-- WG name at the upperleft corner of the doc,
+         IETF is fine for individual submissions.  
+	 If this element is not present, the default is "Network Working Group",
+         which is used by the RFC Editor as a nod to the history of the IETF. -->
+
+    <keyword>DNS</keyword>
+    <keyword>IXFR</keyword>
+    <keyword>AXFR</keyword>
+    <keyword>IXFR-ONLY</keyword>
+
+    <!-- Keywords will be incorporated into HTML output
+         files in a meta tag but they have no effect on text or nroff
+         output. If you submit your draft to the RFC Editor, the
+         keywords will be used for the search engine. -->
+
+    <abstract>
+      <t>Presents IXFR-ONLY, a way for a DNS slave to prevent a DNS
+      master from falling back from IXFR to AXFR.</t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section title="Introduction">
+<t>
+For large DNS zones, <xref target="RFC1995">RFC&nbsp;1995</xref> 
+defines Incremental Zone Transfer (IXFR), which is an efficient way 
+to transfer changes in zones from masters to slaves.
+</t>
+<t>
+However, when a slave has multiple masters for a single zone, it is
+possible that not all masters has the same set of serials for that
+zone. In this case, if a slave attempts an IXFR from a master which
+does not have the serial in use by the slave, the master will fall
+back to a full zone transfer (AXFR).
+</t>
+<t>
+For example, master NS1 may have serials 1, 2, and 3 for a zone, and
+master NS2 may have serials 1 and 3. A slave that is at serial 2
+which sends an IXFR request to NS2 will get a full AXFR of the zone at
+serial 3. This is because NS2 does not know the zone at serial 2, and
+therefore does not know what the differences are between serial 2 and
+serial 3.
+</t>
+<t>
+If the slave in this example had known to send the query to NS1, then
+it could have gotten an incremental transfer. But slaves can only know
+what the latest version of the zone is at a master (this information
+is available via an SOA query).
+</t>
+<t>
+The IXFR-ONLY type provides a way for the slaves to ask each master to
+return an error instead of sending the current version of the zone. By
+using this, a slave can check each master until it finds one able to
+provide IXFR.
+</t>
+      <section title="Requirements Language">
+        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+        document are to be interpreted as described in <xref
+        target="RFC2119">RFC 2119</xref>.</t>
+      </section>
+    </section>
+
+    <section title="Master Side">
+<t>
+A master receiving a DNS message requesting IXFR-ONLY will reply
+exactly as described in <xref target="RFC1995">RFC&nbsp;1995</xref> if
+it is able to produce an IXFR for the serial requested.
+</t>
+<t>
+If the master is is not able to reply with an IXFR it MUST NOT reply
+with an AXFR. Instead, it MUST reply with RCODE CannotIXFR.
+</t>
+    </section>
+
+    <section title="Slave Side">
+<t>
+A slave who wishes to use IXFR-ONLY will send a message to one of the
+masters. The format is exactly the same as for IXFR, except the
+IXFR-ONLY type code is used instead of the IXFR type code.
+</t>
+<t>
+If the master replies with IXFR, then the slave is done.
+</t>
+<t>
+If the master replies with an RCODE of CannotIXFR, then the slave
+proceeds on to a different master. In this case the master implements
+IXFR-ONLY, but does not have the serial requested.
+</t>
+<t>
+If the master replies with any RCODE other than CannotIXFR or NoError,
+then the slave proceeds on to a different master. In this case the
+server does not implement IXFR-ONLY.
+</t>
+<t>
+If the slave attempts IXFR-ONLY to each master and none reply with an
+incremental transfer, then it should attempt an IXFR as described in
+<xref target="RFC1995">RFC&nbsp;1995</xref> to each of the servers
+which replied with an RCODE other than CannotIXFR or NoError.
+</t>
+<t>
+The method described above allows slaves to operate normally to have
+some masters who support IXFR-ONLY, and some who do not. Slaves MAY
+remember which masters support IXFR-ONLY and query those masters
+first. However since masters may change software or even run a mix of
+software, slaves MUST attempt to query each master periodically when
+they attempt to get new versions of a zone.
+</t>
+<t>
+Implementations SHOULD allow slaves to disable IXFR-ONLY for a given
+master, if this is known in advance. These masters are treated as if
+they replied with an RCODE other than CannotIXFR or NoError, although
+no query with IXFR-ONLY is actually sent.
+</t>
+    </section>
+    <section title="Applicability of IXFR-ONLY">
+<t>
+Implementations MUST allow slaves to disable IXFR-ONLY completely.
+</t>
+<t>
+Implementations SHOULD allow slaves to disable IXFR-ONLY for a
+specific zone. This may be useful for small zones, where fallback to
+AXFR is cheap, or in other cases where IXFR-ONLY is causing problems.
+</t>
+<t>
+Usage of IXFR-ONLY may cause slaves to prefer particular masters, by
+shifting load to ones that support IXFR-ONLY. If this a problem, then
+administrators can disable IXFR-ONLY.
+</t>
+<t>
+If a slave has a single master for a zone, it SHOULD use IXFR rather
+than IXFR-ONLY.
+</t>
+    </section>
+
+    <!-- Possibly a 'Contributors' section ... -->
+
+    <section anchor="IANA" title="IANA Considerations">
+<t>
+IANA allocates the new IXFR-ONLY TYPE, which means "incremental
+transfer only". IANA allocates the CannotIXFR RCODE, which means
+"Server cannot provide IXFR for zone".
+</t>
+    </section>
+
+    <section anchor="Security" title="Security Considerations">
+      <t>
+IXFR-ONLY may be used by someone to get information about the state of
+masters by providing a quick and efficient way to check which versions
+of a zone each master supports. Zones should be secured via 
+<xref target="RFC2845">TSIG</xref> prevent unauthorized information
+exposure. However, even administrators of master servers may not want
+this information given to slaves, in which case they will need to
+disable IXFR-ONLY.
+</t>
+    </section>
+  </middle>
+
+  <!--  *****BACK MATTER ***** -->
+
+  <back>
+    <!-- References split into informative and normative -->
+
+    <!-- There are 2 ways to insert reference entries from the citation libraries:
+     1. define an ENTITY at the top, and use "ampersand character"RFC2629; here (as shown)
+     2. simply use a PI "less than character"?rfc include="reference.RFC.2119.xml"?> here
+        (for I-Ds: include="reference.I-D.narten-iana-considerations-rfc2434bis.xml")
+
+     Both are cited textually in the same manner: by using xref elements.
+     If you use the PI option, xml2rfc will, by default, try to find included files in the same
+     directory as the including file. You can also define the XML_LIBRARY environment variable
+     with a value containing a set of directories to search.  These can be either in the local
+     filing system or remote ones accessed by http (http://domain/dir/... ).-->
+
+    <references title="Normative References">
+      <!--?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml"?-->
+      &RFC2119;
+
+      <!--?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.2845.xml"?-->
+      &RFC2845;
+
+      <!--?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.1995.xml"?-->
+      &RFC1995;
+
+    </references>
+
+    <!-- Change Log
+      2009-07-07 version 00
+      -->
+  </back>
+</rfc>
