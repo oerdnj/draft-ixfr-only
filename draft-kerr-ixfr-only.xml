@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="US-ASCII"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- This template is for creating an Internet Draft using xml2rfc,
      which is available here: http://xml.resource.org. -->
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
@@ -133,21 +133,21 @@
     <abstract>
       <t>This documents proposes a new QTYPE (Query pseudo RRtype) for
 	 the Domain Name System (DNS).  IXFR-ONLY is a variant of IXFR
-	 (RFC 1995) that allows an authoritative server to
-	 incrementally update zone content from another (primary)
-	 server without falling back from IXFR to AXFR in case of an
-	 SOA Serial mismatch.  This way, alternate peers can be
-	 contacted more quickly and convergence of zone content may be
-	 achieved much faster in important, resilient operational
-	 scenarios.</t>
+	 (<xref target="RFC1995">RFC&nbsp;1995</xref>) that allows an
+	 authoritative server to incrementally update zone content
+	 from another (primary) server without falling back from IXFR
+	 to AXFR.  This way, alternate peers can be contacted more
+	 quickly and convergence of zone content may be achieved much
+	 faster in important, resilient operational scenarios.</t>
     </abstract>
   </front>
 
   <middle>
     <section title="Introduction">
 <t>
-For large DNS zones, <xref target="RFC1995">RFC&nbsp;1995</xref> 
-defines Incremental Zone Transfer (IXFR).
+For large DNS zones, <xref target="RFC1995">RFC&nbsp;1995</xref>
+defines Incremental Zone Transfer (IXFR), which allows only to
+transfer the changed portion(s) of a zone.
 </t>
 <t>
 In the document, an IXFR client and an IXFR server is defined as
@@ -158,26 +158,23 @@ server.
 </t>
 <t>
 IXFR is an efficient way to transfer changes in zones from IXFR
-servers to IXFR clients.
-</t>
-<t>
-However, when an IXFR client has multiple IXFR servers for a single
-zone, it is possible that not all IXFR servers have the zone with same
-SOA serial number for that zone. In this case, if an IXFR client
-attempts an IXFR from an IXFR server which does not have zone with the
-SOA serial number used by the IXFR client, the IXFR server will fall
-back to a full zone transfer (AXFR) when it has a newer version of the
-zone.
+servers to IXFR clients.  However, when an IXFR client has multiple
+IXFR servers for a single zone, it is possible that not all IXFR
+servers have the zone with same SOA serial number for that zone. In
+this case, if an IXFR client attempts an IXFR from an IXFR server
+which does not have zone with the SOA serial number used by the IXFR
+client, the IXFR server will fall back to a full zone transfer (AXFR)
+when it has a newer version of the zone.
 </t>
 <t>
 For example, IXFR server NS1 may have SOA serial numbers 1, 2, and 3
 for a zone, and IXFR server NS2 may have SOA serial numbers 1 and 3
 for the same zone.  An IXFR client that has the zone with SOA serial
 number 2 which sends an IXFR request to IXFR server NS2 will get a
-full zone transfer (AXFR) of the zone at serial 3.  This is because
-NS2 does not know the zone with SOA serial number 2, and therefore
-does not know what the differences are between zone with SOA serial
-number 2 and 3.
+full zone transfer (AXFR) of the zone at SOA serial number 3.  This is
+because NS2 does not know the zone with SOA serial number 2, and
+therefore does not know what the differences are between zone with SOA
+serial number 2 and 3.
 </t>
 <t>
 If the IXFR client in this example had known to send the query to IXFR
@@ -200,11 +197,11 @@ provide IXFR.
       </section>
     </section>
 
-    <section title="Master Side">
+    <section title="IXFR Server Side">
 <t>
 A IXFR server receiving a DNS message requesting IXFR-ONLY will reply
 as described in <xref target="RFC1995">RFC&nbsp;1995</xref> if it is
-able to produce an IXFR for the serial requested.
+able to produce an IXFR for the SOA serial number requested.
 </t>
 <t>
 If the IXFR server is is not able to reply with an IXFR it MUST NOT
@@ -219,7 +216,7 @@ using AXFR is smaller than an equivalent IXFR reply.
 </t>
     </section>
 
-    <section title="Slave Side">
+    <section title="IXFR Client Side">
 <t>
 An IXFR client who wishes to use IXFR-ONLY will send a message to one
 of the IXFR servers.  The format is exactly the same as for IXFR,
@@ -257,8 +254,8 @@ attempt to get new versions of a zone.
 </t>
 <t>
 Implementations MAY allow IXFR clients to disable IXFR-ONLY for a
-given IXFR server, if this is known in advance.  These masters are
-treated as if they replied with an RCODE other than CannotIXFR or
+given IXFR server, if this is known in advance.  These IXFR servers
+are treated as if they replied with an RCODE other than CannotIXFR or
 NoError, although no query with IXFR-ONLY is actually sent.
 </t>
     </section>
@@ -296,8 +293,8 @@ transfer only".  IANA allocates the CannotIXFR RCODE, which means
     <section anchor="Security" title="Security Considerations">
       <t>
 IXFR-ONLY may be used by someone to get information about the state of
-masters by providing a quick and efficient way to check which versions
-of a zone each master supports.  Zones should be secured via
+IXFR servers by providing a quick and efficient way to check which
+versions of a zone each IXFR server supports.  Zones should be secured via
 <xref target="RFC2845">TSIG</xref> to prevent unauthorized information
 exposure.  However, even administrators of IXFR servers may not want
 this information given to IXFR clients, in which case they will need to
@@ -337,12 +334,14 @@ disable IXFR-ONLY.
     <!-- Change Log
       2009-07-07 version 00
       2009-08-04 version 01
-        - (SK) allow masters to reply with AXFR if they are certain the
-          result is smaller than an equivalent IXFR
-        - (SK) change a lot of MUST -> SHOULD and SHOULD -> MAY
-        - (SK) grammer nits
-        - (OS) use IXFR client and IXFR server instead of master and slave
-        - (OS) use SOA serial number instead of 'serial'
+        * Shane Kerr
+          -  allow masters to reply with AXFR if they are certain the
+             result is smaller than an equivalent IXFR
+          - change a lot of MUST -> SHOULD and SHOULD -> MAY
+          - grammer nits
+        * Ondřej Surý
+          - use IXFR client and IXFR server instead of master and slave
+          - use SOA serial number instead of just 'serial'
       -->
   </back>
 </rfc>
