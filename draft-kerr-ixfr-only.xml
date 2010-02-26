@@ -35,7 +35,7 @@
 <?rfc subcompact="no" ?>
 <!-- keep one blank line between list items -->
 <!-- end of list of popular I-D processing instructions -->
-<rfc category="std" docName="draft-kerr-ixfr-only-00" ipr="trust200811" updates="1995">
+<rfc category="std" docName="draft-kerr-ixfr-only-00" ipr="trust200902" updates="1995">
   <!-- category values: std, bcp, info, exp, and historic
      ipr values: full3667, noModification3667, noDerivatives3667
      you can add the attributes updates="NNNN" and obsoletes="NNNN" 
@@ -133,12 +133,12 @@
     <abstract>
       <t>This documents proposes a new QTYPE (Query pseudo RRtype) for
 	 the Domain Name System (DNS).  IXFR-ONLY is a variant of IXFR
-	 (<xref target="RFC1995">RFC&nbsp;1995</xref>) that allows an
-	 authoritative server to incrementally update zone content
-	 from another (primary) server without falling back from IXFR
-	 to AXFR.  This way, alternate peers can be contacted more
-	 quickly and convergence of zone content may be achieved much
-	 faster in important, resilient operational scenarios.</t>
+	 (RFC&nbsp;1995) that allows an authoritative server to
+	 incrementally update zone content from another (primary)
+	 server without falling back from IXFR to AXFR.  This way,
+	 alternate peers can be contacted more quickly and convergence
+	 of zone content may be achieved much faster in important,
+	 resilient operational scenarios.</t>
     </abstract>
   </front>
 
