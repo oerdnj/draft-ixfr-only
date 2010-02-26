@@ -160,21 +160,21 @@ server.
 IXFR is an efficient way to transfer changes in zones from IXFR
 servers to IXFR clients.  However, when an IXFR client has multiple
 IXFR servers for a single zone, it is possible that not all IXFR
-servers have the zone with same SOA serial number for that zone. In
+servers have the zone with same serial number for that zone. In
 this case, if an IXFR client attempts an IXFR from an IXFR server
-which does not have zone with the SOA serial number used by the IXFR
+which does not have zone with the serial number used by the IXFR
 client, the IXFR server will fall back to a full zone transfer (AXFR)
-when it has a newer version of the zone.
+when it has a version of the zone with serial number greater than
+the serial requested by the IXFR client.
 </t>
 <t>
-For example, IXFR server NS1 may have SOA serial numbers 1, 2, and 3
-for a zone, and IXFR server NS2 may have SOA serial numbers 1 and 3
-for the same zone.  An IXFR client that has the zone with SOA serial
-number 2 which sends an IXFR request to IXFR server NS2 will get a
-full zone transfer (AXFR) of the zone at SOA serial number 3.  This is
-because NS2 does not know the zone with SOA serial number 2, and
-therefore does not know what the differences are between zone with SOA
-serial number 2 and 3.
+For example, IXFR server NS1 may have serial numbers 1, 2, and 3 for a
+zone, and IXFR server NS2 may have serial numbers 1 and 3 for the same
+zone.  An IXFR client that has the zone with serial number 2 which
+sends an IXFR request to IXFR server NS2 will get a full zone transfer
+(AXFR) of the zone at serial number 3.  This is because NS2 does not
+know the zone with serial number 2, and therefore does not know what
+the differences are between zone with serial number 2 and 3.
 </t>
 <t>
 If the IXFR client in this example had known to send the query to IXFR
@@ -201,7 +201,7 @@ provide IXFR.
 <t>
 A IXFR server receiving a DNS message requesting IXFR-ONLY will reply
 as described in <xref target="RFC1995">RFC&nbsp;1995</xref> if it is
-able to produce an IXFR for the SOA serial number requested.
+able to produce an IXFR for the serial number requested.
 </t>
 <t>
 If the IXFR server is is not able to reply with an IXFR it MUST NOT
@@ -229,7 +229,7 @@ If the IXFR server replies with IXFR, then the IXFR client is done.
 If the IXFR server replies with an RCODE of CannotIXFR, then the IXFR
 client proceeds on to a different IXFR server. In this case the IXFR
 server implements IXFR-ONLY, but does not have information about zone
-with the SOA serial number requested.
+with the serial number requested.
 </t>
 <t>
 If the IXFR server replies with any RCODE other than CannotIXFR or
@@ -341,7 +341,7 @@ disable IXFR-ONLY.
           - grammer nits
         * Ondřej Surý
           - use IXFR client and IXFR server instead of master and slave
-          - use SOA serial number instead of just 'serial'
+          - use 'serial number' instead of just 'serial' as per RFC1912
       -->
   </back>
 </rfc>
